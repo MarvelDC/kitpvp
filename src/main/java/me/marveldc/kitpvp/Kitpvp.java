@@ -3,12 +3,14 @@ package me.marveldc.kitpvp;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.marveldc.kitpvp.commands.Query;
-import me.marveldc.kitpvp.events.Pvp;
+import me.marveldc.kitpvp.listeners.MiscListeners;
+import me.marveldc.kitpvp.listeners.Pvp;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static me.marveldc.kitpvp.Util.setScoreboard;
 import static me.marveldc.kitpvp.Util.tl;
 
 public class Kitpvp extends JavaPlugin {
@@ -42,9 +45,11 @@ public class Kitpvp extends JavaPlugin {
 
         try {
             Class.forName("org.postgresql.Driver");
+            HikariConfig config = new HikariConfig(getDataFolder() + "\\database.properties");
+            ds = new HikariDataSource(config);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            System.out.println("Failed to load.");
+            System.out.println("[kitpvp] Failed to load driver.");
         }
 
         createMessagesFile();
@@ -54,9 +59,7 @@ public class Kitpvp extends JavaPlugin {
 
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new Pvp(), this);
-
-        HikariConfig config = new HikariConfig(getDataFolder() + "\\database.properties");
-        ds = new HikariDataSource(config);
+        pm.registerEvents(new MiscListeners(), this);
 
         //fetchData();
     }
@@ -64,6 +67,7 @@ public class Kitpvp extends JavaPlugin {
     @Override
     public void onDisable() {
         super.onDisable();
+        ds.close();
     }
 
     public static Connection getConnection() throws SQLException {
