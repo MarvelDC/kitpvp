@@ -1,0 +1,10 @@
+name: KitPvP
+version: 1.0.0
+main: me.marveldc.kitpvp.Kitpvp
+author: MarvelDC
+description: KitPvP plugin
+
+commands:
+  query:
+    usage: /<command>
+    description: Execute a query.
